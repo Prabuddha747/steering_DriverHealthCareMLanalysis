@@ -271,47 +271,47 @@ def section_prediction(ckpt, prep, df):
 
     st.info("Use the LSTM-AE model to predict stress level from sensor data.")
 
-    option = st.radio("Input", ["Use sample from dataset", "Upload CSV"])
+    # option = st.radio("Input", ["Use sample from dataset", "Upload CSV"])
     X_in = None
     sample_info = ""
 
-    if option == "Use sample from dataset":
-        if df is not None and len(df) >= WINDOW_SIZE:
-            n = st.slider("Number of samples to predict", 1, 20, 5)
-            # Build sequences from df
-            df_sample = df.head(5000)
-            le_activity = prep["le_activity"]
-            le_route = prep["le_route"]
-            scaler = prep["scaler"]
-            num_cols = ["HeartRate_bpm", "SpO2_pct", "BodyTemp_C", "GSR_uS", "Speed_kmph", "Latitude", "Longitude", "DayIndex"]
-            done = False
-            for driver_id, g in df_sample.groupby("DriverID"):
-                if done:
-                    break
-                g = g.sort_values("Timestamp").reset_index(drop=True)
-                if len(g) < WINDOW_SIZE:
-                    continue
-                X_raw = np.hstack([
-                    g[num_cols].values.astype(np.float32),
-                    le_activity.transform(g["ActivityState"].astype(str)).reshape(-1, 1).astype(np.float32),
-                    le_route.transform(g["RouteDirection"].astype(str)).reshape(-1, 1).astype(np.float32),
-                ])
-                feats = scaler.transform(X_raw)
-                for i in range(len(g) - WINDOW_SIZE):
-                    seq = feats[i : i + WINDOW_SIZE]
-                    if X_in is None:
-                        X_in = seq[np.newaxis, ...]
-                    else:
-                        X_in = np.vstack([X_in, seq[np.newaxis, ...]])
-                    if X_in.shape[0] >= n:
-                        X_in = X_in[:n]
-                        done = True
-                        break
-        else:
-            st.warning("Dataset not loaded or too small.")
-    else:
-        uploaded = st.file_uploader("Upload CSV with same columns as training data", type=["csv"])
-        if uploaded:
+    # if option == "Use sample from dataset":
+    #     if df is not None and len(df) >= WINDOW_SIZE:
+    #         n = st.slider("Number of samples to predict", 1, 20, 5)
+    #         # Build sequences from df
+    #         df_sample = df.head(5000)
+    #         le_activity = prep["le_activity"]
+    #         le_route = prep["le_route"]
+    #         scaler = prep["scaler"]
+    #         num_cols = ["HeartRate_bpm", "SpO2_pct", "BodyTemp_C", "GSR_uS", "Speed_kmph", "Latitude", "Longitude", "DayIndex"]
+    #         done = False
+    #         for driver_id, g in df_sample.groupby("DriverID"):
+    #             if done:
+    #                 break
+    #             g = g.sort_values("Timestamp").reset_index(drop=True)
+    #             if len(g) < WINDOW_SIZE:
+    #                 continue
+    #             X_raw = np.hstack([
+    #                 g[num_cols].values.astype(np.float32),
+    #                 le_activity.transform(g["ActivityState"].astype(str)).reshape(-1, 1).astype(np.float32),
+    #                 le_route.transform(g["RouteDirection"].astype(str)).reshape(-1, 1).astype(np.float32),
+    #             ])
+    #             feats = scaler.transform(X_raw)
+    #             for i in range(len(g) - WINDOW_SIZE):
+    #                 seq = feats[i : i + WINDOW_SIZE]
+    #                 if X_in is None:
+    #                     X_in = seq[np.newaxis, ...]
+    #                 else:
+    #                     X_in = np.vstack([X_in, seq[np.newaxis, ...]])
+    #                 if X_in.shape[0] >= n:
+    #                     X_in = X_in[:n]
+    #                     done = True
+    #                     break
+    #     else:
+    #         st.warning("Dataset not loaded or too small.")
+    # else:
+    uploaded = st.file_uploader("Upload CSV with same columns as training data", type=["csv"])
+    if uploaded:
             up_df = pd.read_csv(uploaded)
             if len(up_df) < WINDOW_SIZE:
                 st.error(f"Need at least {WINDOW_SIZE} rows.")
