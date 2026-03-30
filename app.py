@@ -168,10 +168,12 @@ def section_metrics_table(artifacts):
     rows = []
     for model_name, data in artifacts["metrics"].items():
         for at_name, metrics in data.items():
+            if at_name != "without_at":
+               continue  # Only show rows without Adaptive Thresholding
             label = "With AT" if at_name == "with_at" else "Without AT"
             rows.append({
                 "Model": model_name,
-                "Adaptive Thresholding": label,
+                # "Adaptive Thresholding": label,
                 "Accuracy": f"{metrics['accuracy']*100:.1f}%",
                 "Precision": f"{metrics['precision']*100:.1f}%",
                 "Recall": f"{metrics['recall']*100:.1f}%",
@@ -365,7 +367,7 @@ def main():
     section = render_sidebar()
     artifacts = load_artifacts()
     ckpt, prep = load_lstmae_model()
-    df = load_data(limit=50000)
+    df = load_data(limit=144000)
 
     if section == "Home":
         section_home(artifacts, df)

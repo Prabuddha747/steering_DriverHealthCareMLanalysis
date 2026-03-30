@@ -82,7 +82,14 @@ def load_and_preprocess():
     - If USE_TRIP_LEVEL: one row per one-way trip (FWD/BWD); sequences = windows of trips per driver.
     - If SPLIT_BY_DRIVER: train/val split by driver so validation is on unseen drivers.
     """
+    
+    
     df = pd.read_csv(DATA_PATH)
+    
+    noise_std = 0.05  # Adjust as needed
+    for col in FEATURE_COLS_NUM:
+        if col in df.columns:
+            df[col] += np.random.normal(0, noise_std * df[col].std(), size=len(df))
     if SAMPLE_SIZE:
         df = df.sample(
             n=min(SAMPLE_SIZE, len(df)), random_state=RANDOM_STATE
@@ -124,7 +131,10 @@ def load_and_preprocess():
             idx_all, test_size=0.2, random_state=RANDOM_STATE, stratify=y
         )
         train_drivers = val_drivers = set()
-
+        print("Class distribution in TRAIN split:")
+        print(pd.Series(y[idx_train]).value_counts(normalize=True))
+        print("Class distribution in VAL split:")
+        print(pd.Series(y[idx_val]).value_counts(normalize=True))
     if USE_TRIP_LEVEL:
         # Tabular: one row per trip
         X_tab_tr, X_tab_val = X_full[idx_train], X_full[idx_val]

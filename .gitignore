@@ -52,5 +52,4 @@ venv/
 __pycache__/
 *.pyc
 .DS_Store
-artifacts/
-models/
+# artifacts/ and models/ are included so Streamlit Cloud has metrics and LSTM-AE prediction
